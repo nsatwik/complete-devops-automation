@@ -254,7 +254,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     credentialsId: 'git-cred',
-                    url: 'https://github.com/Reshufowzi/application-code.git'
+                    url: 'https://github.com/nsatwik/complete-devops-automation.git'
             }
         }
     }
@@ -276,7 +276,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     credentialsId: 'git-cred',
-                    url: 'https://github.com/Reshufowzi/application-code.git'
+                    url: 'https://github.com/nsatwik/complete-devops-automation.git'
             }
         }
 
@@ -315,7 +315,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     credentialsId: 'git-cred',
-                    url: 'https://github.com/Reshufowzi/application-code.git'
+                    url: 'https://github.com/nsatwik/complete-devops-automation.git'
             }
         }
 
@@ -363,7 +363,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     credentialsId: 'git-cred',
-                    url: 'https://github.com/Reshufowzi/application-code.git'
+                    url: 'https://github.com/nsatwik/complete-devops-automation.git'
             }
         }
 
@@ -429,7 +429,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     credentialsId: 'git-cred',
-                    url: 'https://github.com/Reshufowzi/application-code.git'
+                    url: 'https://github.com/nsatwik/complete-devops-automation.git'
             }
         }
 
@@ -500,7 +500,7 @@ pipeline {
         PATH = "/opt/sonar-scanner/bin:${PATH}"
         ECR_REPO = '128913199644.dkr.ecr.us-east-1.amazonaws.com/myecrrepo'
         AWS_REGION = 'us-east-1'
-        DEPLOYMENT_REPO = 'https://github.com/Reshufowzi/deployment-repo.git'
+        DEPLOYMENT_REPO = 'https://github.com/nsatwik/complete-devops-automation.git'
     }
 
     stages {
@@ -509,7 +509,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     credentialsId: 'git-cred',
-                    url: 'https://github.com/Reshufowzi/application-code.git'
+                    url: 'https://github.com/nsatwik/complete-devops-automation.git'
             }
         }
 
