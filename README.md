@@ -46,7 +46,7 @@ Browser → HTML Website
 
 ## Jenkins Installation
 
-Create the EC2 - t2.large .. install the java and jenkins  
+ **Install Jenkins from official jenkins page**
 
 ## Docker Installation
 
