@@ -166,11 +166,38 @@ sudo apt-get install -y trivy
 ---
 
 ## Install and Configure kubectl
+## 1. Add the Kubernetes package repository
+**Run these commands on your Ubuntu EC2 instance**
+
 ```bash
-curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/linux/amd64/kubectl
-chmod +x ./kubectl
-sudo mv ./kubectl /usr/local/bin
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl
+sudo mkdir -p -m 755 /etc/apt/keyrings
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.37/deb/Release.key \
+  | sudo gpg --dearmor --yes -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.37/deb/ /' \
+  | sudo tee /etc/apt/sources.list.d/kubernetes.list
+```
+
+**2. Install kubectl**
+
+```bash
+sudo apt-get update
+sudo apt-get install -y kubectl
+```
+
+**If you need to prevent automatic upgrades to a newer minor version**
+
+```bash
+sudo apt-mark hold kubectl
+```
+
+**3. Verify the version**
+```bash
 kubectl version --client
+which kubectl
+apt-cache policy kubectl
 ```
 
 ---
