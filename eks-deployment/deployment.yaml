@@ -40,7 +40,7 @@ metadata:
   labels:
     app: mypod
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: mypod
   ports:
