@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -12,7 +13,7 @@ pipeline {
 
     stages {
 
-        stage("Checkout") {
+        stage('Checkout') {
             steps {
                 git branch: 'main',
                     credentialsId: 'git-cred',
@@ -24,7 +25,7 @@ pipeline {
             steps {
                 script {
                     def shortHash = sh(
-                        script: "git rev-parse --short HEAD",
+                        script: 'git rev-parse --short HEAD',
                         returnStdout: true
                     ).trim()
 
@@ -37,14 +38,14 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_SERVER}") {
-                    sh "sonar-scanner"
+                    sh 'sonar-scanner'
                 }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo "Using updated Image tag ${IMAGE_NAME}:${IMAGE_TAG}"
+                echo "Building image: ${IMAGE_NAME}:${IMAGE_TAG}"
 
                 sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
                 sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
@@ -59,14 +60,21 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-cred'
+                ]]) {
                     sh '''
-                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
-                        docker tag $IMAGE_NAME:$IMAGE_TAG $ECR_REPO:$IMAGE_TAG
-                        docker push $ECR_REPO:$IMAGE_TAG
+                        set -eu
 
-                        docker tag $IMAGE_NAME:$IMAGE_TAG $ECR_REPO:latest
-                        docker push $ECR_REPO:latest
+                        aws ecr get-login-password --region "$AWS_REGION" |
+                            docker login --username AWS --password-stdin "$ECR_REPO"
+
+                        docker tag "$IMAGE_NAME:$IMAGE_TAG" "$ECR_REPO:$IMAGE_TAG"
+                        docker push "$ECR_REPO:$IMAGE_TAG"
+
+                        docker tag "$IMAGE_NAME:$IMAGE_TAG" "$ECR_REPO:latest"
+                        docker push "$ECR_REPO:latest"
                     '''
                 }
             }
@@ -80,29 +88,55 @@ pipeline {
                     passwordVariable: 'GIT_PASSWORD'
                 )]) {
                     sh '''
-                        rm -rf gitops-repo
-                        git clone https://$GIT_USERNAME:$GIT_PASSWORD@github.com/nsatwik/complete-devops-automation.git gitops-repo
+                        set -eu
 
-                        cd gitops-repo/eks-deployment || exit 1
+                        ASKPASS="$WORKSPACE/git-askpass.sh"
+
+                        cat > "$ASKPASS" <<'EOF'
+#!/bin/sh
+case "$1" in
+    *Username*) printf '%s\\n' "$GIT_USERNAME" ;;
+    *Password*) printf '%s\\n' "$GIT_PASSWORD" ;;
+esac
+EOF
+
+                        chmod 700 "$ASKPASS"
+
+                        export GIT_ASKPASS="$ASKPASS"
+                        export GIT_TERMINAL_PROMPT=0
+
+                        rm -rf gitops-repo
+
+                        git clone \
+                            https://github.com/nsatwik/complete-devops-automation.git \
+                            gitops-repo
+
+                        cd gitops-repo
 
                         echo "Before update:"
-                        grep image deployment.yaml
+                        grep -A3 '^image:' helm/hello/values.yaml
 
-                        sed -i "s#image: ${ECR_REPO}:.*#image: ${ECR_REPO}:${IMAGE_TAG}#g" deployment.yaml
+                        sed -i -E \
+                            "s/^  tag: .*/  tag: \\"${IMAGE_TAG}\\"/" \
+                            helm/hello/values.yaml
 
                         echo "After update:"
-                        grep image deployment.yaml
+                        grep -A3 '^image:' helm/hello/values.yaml
 
                         git config user.email "jenkins@local"
                         git config user.name "Jenkins"
 
-                        git add deployment.yaml
-                        git commit -m "Update image tag to ${IMAGE_TAG} (Build ${BUILD_NUMBER})" || echo "No changes to commit"
-                        git push origin main
+                        git add helm/hello/values.yaml
+
+                        git commit \
+                            -m "Update image tag to ${IMAGE_TAG} [skip ci]"
+
+                        git push origin HEAD:main
+
+                        rm -f "$ASKPASS"
                     '''
                 }
             }
         }
-
     }
 }
