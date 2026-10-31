@@ -7,7 +7,7 @@ templates = Jinja2Templates(directory="/code")
 
 @app.get("/")
 def form_post(request: Request):
-    return templates.TemplateResponse('portfolio.html', context={'request': request})
+    return templates.TemplateResponse('app.html', context={'request': request})
 
 @app.get("/new")
 def form_post(request: Request):
