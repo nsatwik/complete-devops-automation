@@ -1,0 +1,27 @@
+replicaCount: 2
+
+image:
+  repository: 815018697163.dkr.ecr.ap-south-1.amazonaws.com/hello
+  tag: "3-dc2be52"
+  pullPolicy: IfNotPresent
+
+container:
+  name: cont1
+  port: 80
+
+service:
+  name: mypod-svc
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+env:
+  ENV: dev
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"
