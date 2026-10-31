@@ -489,8 +489,8 @@ pipeline {
         IMAGE_NAME = 'mydockerimage'
         SONARQUBE_SERVER = 'SonarQubeServer'
         PATH = "/opt/sonar-scanner/bin:${PATH}"
-        ECR_REPO = '128913199644.dkr.ecr.us-east-1.amazonaws.com/myecrrepo'
-        AWS_REGION = 'us-east-1'
+        ECR_REPO = '815018697163.dkr.ecr.ap-south-1.amazonaws.com/hello'
+        AWS_REGION = 'ap-south-1'
     }
 
     stages {
@@ -568,8 +568,8 @@ pipeline {
         IMAGE_NAME = 'mydockerimage'
         SONARQUBE_SERVER = 'SonarQubeServer'
         PATH = "/opt/sonar-scanner/bin:${PATH}"
-        ECR_REPO = '128913199644.dkr.ecr.us-east-1.amazonaws.com/myecrrepo'
-        AWS_REGION = 'us-east-1'
+        ECR_REPO = '815018697163.dkr.ecr.ap-south-1.amazonaws.com/hello'
+        AWS_REGION = 'ap-south-1'
         DEPLOYMENT_REPO = 'https://github.com/nsatwik/complete-devops-automation.git'
     }
 
