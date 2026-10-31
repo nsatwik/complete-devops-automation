@@ -11,7 +11,7 @@ container:
 
 service:
   name: mypod-svc
-  type: ClusterIP
+  type: LoadBalancer
   port: 80
   targetPort: 80
 
