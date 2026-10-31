@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: 815018697163.dkr.ecr.ap-south-1.amazonaws.com/hello
-  tag: "37-6cb893d"
+  tag: "38-3fe42a6"
   pullPolicy: IfNotPresent
 
 container:
