@@ -83,7 +83,7 @@ pipeline {
                         rm -rf gitops-repo
                         git clone https://$GIT_USERNAME:$GIT_PASSWORD@github.com/nsatwik/complete-devops-automation.git gitops-repo
 
-                        cd gitops-repo/k8s || exit 1
+                        cd gitops-repo/eks-deployment || exit 1
 
                         echo "Before update:"
                         grep image deployment.yaml
