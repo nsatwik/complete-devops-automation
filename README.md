@@ -215,101 +215,51 @@ kubectl get nodes
 
 ---
 
-## Install Helm 3
-
-```bash
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-helm version
-```
-
-Ensure nodes are listed and ready.
-
----
-
 ## Install Argo CD in EKS
-
-Create a namespace:
-
 ```bash
 kubectl create namespace argocd
 ```
 
-Use this values.yaml for exposing argocd in NodePort
-```yaml
-# Basic Argo CD values for NodePort exposure
-server:
-  service:
-    type: NodePort
-    nodePortHttp: 30080        # optional — choose a fixed NodePort (HTTP)
-    nodePortHttps: 30443       # optional — choose a fixed NodePort (HTTPS)
-    ports:
-      http: 80
-      https: 443
-  ingress:
-    enabled: false
-  insecure: true                # serve UI without enforcing HTTPS (for lab use)
-  extraArgs:
-    - --insecure                # disable TLS redirection in ArgoCD server
-
-configs:
-  cm:
-    # Disable TLS redirect so UI works over plain HTTP
-    server.insecure: "true"
-
-redis:
-  enabled: true
-
-controller:
-  replicas: 1
-repoServer:
-  replicas: 1
-applicationSet:
-  replicas: 1
-```
-
-Install Argo CD using the official Helm:
+**Then install the official Argo CD manifests**
 ```bash
-# Add and update the Argo Helm repo
-helm repo add argo https://argoproj.github.io/argo-helm
-helm repo update
-
-# Install using the NodePort values file
-helm upgrade --install argocd argo/argo-cd \
-  -n argocd \
-  -f values.yaml
+kubectl apply -n argocd \
+  -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
 
-Verify installation:
-
+**This installs the Argo CD server, repository server, application controller and supporting components**
+**Step 3 — Verify installation**
 ```bash
 kubectl get pods -n argocd
 ```
 
----
+**Wait until the pods are Running and Ready. The application controller is a StatefulSet, so it may take a little longer**
 
-## Access the Argo CD UI
-
-Access via browser:
-Allow ==30080== port in Worker Node Security Group 
-```
-https://<ec2-publicip>:30080
-```
-
-Get the initial admin password:
-
+**Also check**
 ```bash
-kubectl -n argocd get secret argocd-initial-admin-secret -o yaml
-echo <base64secret> | base64 --decode
+kubectl get svc -n argocd
+```
+**Step 4 — Install Argo CD CLI**
+```bash
+ARCH=amd64
+VERSION=3.5.6
+curl -fL --retry 3 -o /tmp/argocd "https://github.com/argoproj/argo-cd/releases/download/v${VERSION}/argocd-linux-${ARCH}"
 ```
 
-Login using:
-
+**Verify the download**
+```bash
+file /tmp/argocd
+ls -lh /tmp/argocd
 ```
-Username: admin
-Password: <decoded-password>
-```
 
----
+**If the file exists and is identified as an ELF 64-bit executable, install it**
+```bash
+install -m 555 /tmp/argocd /usr/local/bin/argocd
+argocd version --client
+```
+**porting**
+```bash
+kubectl port-forward -n argocd svc/argocd-server 8081:443
+```
 
 ## Jenkinsfile
 
