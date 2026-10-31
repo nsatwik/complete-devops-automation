@@ -127,7 +127,7 @@ which sonar-scanner
 Official installation reference: SonarScanner CLI documentation. 
 Sonar Documentation
 
-4. Make it available to Jenkins
+**4. Make it available to Jenkins**
 If Jenkins runs on the same EC2 instance, test the scanner as the Jenkins user:
 ```bash
 sudo -u jenkins /opt/sonar-scanner/bin/sonar-scanner --version
