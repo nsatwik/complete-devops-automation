@@ -644,7 +644,7 @@ pipeline {
                 )]) {
                     sh '''
                         rm -rf gitops-repo
-                        git clone https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Reshufowzi/deployment-repo.git gitops-repo
+                        git clone https://$GIT_USERNAME:$GIT_PASSWORD@github.com/nsatwik/complete-devops-automation.git.git gitops-repo
 
                         cd gitops-repo/k8s || exit 1
 
