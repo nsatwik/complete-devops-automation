@@ -77,17 +77,60 @@ docker run -d --name sonarqube -p 9000:9000 sonarqube:latest
 
 ## Sonar Scanner Installation
 
-Sonar Scanner is required for Jenkins to run code quality analysis.
-
-### Commands:
-
+### Let's install SonarScanner CLI on your Ubuntu EC2 instance and configure it so Jenkins can run SonarQube analysis
+**1. Install prerequisites**
+Connect to the EC2 instance where you want to run SonarScanner, then execute:
 ```bash
-wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-sudo apt install -y unzip
-unzip sonar-scanner-cli-5.0.1.3006-linux.zip
-sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
+sudo apt update
+sudo apt install -y curl unzip
+```
 
-export PATH=$PATH:/opt/sonar-scanner/bin
+Check Java availability:
+```bash
+java -version
+```
+
+**If Java is missing, install it**
+```bash
+sudo apt install -y openjdk-21-jre
+```
+
+**2. Download and install SonarScanner CLI**
+This installs the scanner under /opt:
+```bash
+cd /tmp
+curl -fSL \
+  https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-8.2.0.6438-linux-x64.zip \
+  -o sonar-scanner.zip
+sudo unzip -o sonar-scanner.zip -d /opt
+sudo ln -sfn /opt/sonar-scanner-8.2.0.6438-linux-x64 /opt/sonar-scanner
+```
+
+**Add it to the system PATH**
+```bash
+echo 'export PATH="/opt/sonar-scanner/bin:$PATH"' \
+  | sudo tee /etc/profile.d/sonar-scanner.sh
+source /etc/profile.d/sonar-scanner.sh
+```
+
+**3. Verify installation**
+Run:
+```bash
+sonar-scanner --version
+which sonar-scanner
+```
+
+**You should see the scanner version and a path similar to:**
+/opt/sonar-scanner/bin/sonar-scanner
+
+
+Official installation reference: SonarScanner CLI documentation. 
+Sonar Documentation
+
+4. Make it available to Jenkins
+If Jenkins runs on the same EC2 instance, test the scanner as the Jenkins user:
+```bash
+sudo -u jenkins /opt/sonar-scanner/bin/sonar-scanner --version
 ```
 
 ---
