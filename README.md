@@ -216,49 +216,110 @@ kubectl get nodes
 ---
 
 ## Install Argo CD in EKS
+**Step 1: Update packages**
 ```bash
-kubectl create namespace argocd
+sudo apt-get update
+sudo apt-get install -y curl gpg apt-transport-https
 ```
-
-**Then install the official Argo CD manifests**
+**Step 2: Add the official Helm repository key**
 ```bash
-kubectl apply -n argocd \
-  -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | \
+gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
 ```
-
-**This installs the Argo CD server, repository server, application controller and supporting components**
-**Step 3 — Verify installation**
+**Step 3. Install Helm 3 directly**
+Run:
+```bash
+curl -fsSL -o get_helm.sh \
+https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+helm upgrade --install argocd argo/argo-cd \
+  --namespace argocd \
+  --create-namespace
+```
+**Step 4. Continue installing Argo CD**
+Once Helm is installed:
+```bash
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+```
+**5. Verify**
 ```bash
 kubectl get pods -n argocd
 ```
+**6. On your Ubuntu EC2 terminal, execute**
 
-**Wait until the pods are Running and Ready. The application controller is a StatefulSet, so it may take a little longer**
-
-**Also check**
 ```bash
-kubectl get svc -n argocd
-```
-**Step 4 — Install Argo CD CLI**
-```bash
-ARCH=amd64
-VERSION=3.5.6
-curl -fL --retry 3 -o /tmp/argocd "https://github.com/argoproj/argo-cd/releases/download/v${VERSION}/argocd-linux-${ARCH}"
+kubectl port-forward --address 0.0.0.0 \
+  svc/argocd-server -n argocd 8081:443
 ```
 
-**Verify the download**
+**https://YOUR-EC2-PUBLIC-IP:8081**
+
+**8. To get Password use**
 ```bash
-file /tmp/argocd
-ls -lh /tmp/argocd
+kubectl get secret argocd-initial-admin-secret \
+  -n argocd \
+  -o jsonpath="{.data.password}" | base64 -d
+```
+**9. Clone the repo**
+
+**Update your Argo CD Application manifest**
+Open:
+```bash
+vi hello-app.yaml
+```
+**Replace the previous configuration with**
+```bash
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-app
+  namespace: argocd
+
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/nsatwik/complete-devops-automation.git
+    targetRevision: main
+    path: helm/hello
+
+    helm:
+      releaseName: hello
+      parameters:
+        - name: service.type
+          value: NodePort
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: devops-demo
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+    syncOptions:
+      - CreateNamespace=true
+```
+**10. Apply the configuration**
+```bash
+kubectl apply -f hello-app.yaml
+```
+**11.Check synchronization**
+```bash
+kubectl get application hello-app -n argocd
 ```
 
-**If the file exists and is identified as an ELF 64-bit executable, install it**
+**Check the NodePort service**
 ```bash
-install -m 555 /tmp/argocd /usr/local/bin/argocd
-argocd version --client
+kubectl get svc -n devops-demo
 ```
-**porting**
+**Get your EKS worker node public IP**
+Run:
 ```bash
-kubectl port-forward -n argocd svc/argocd-server 8081:443
+kubectl get nodes -o wide
 ```
 
 ## Jenkinsfile
