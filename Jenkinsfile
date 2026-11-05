@@ -6,7 +6,7 @@ pipeline {
         IMAGE_NAME = 'mydockerimage'
         SONARQUBE_SERVER = 'SonarQubeServer'
         PATH = "/opt/sonar-scanner/bin:${PATH}"
-        ECR_REPO = '815018697163.dkr.ecr.ap-south-1.amazonaws.com/hello'
+        ECR_REPO = '815018697163.dkr.ecr.ap-south-1.amazonaws.com/myrepo'
         AWS_REGION = 'ap-south-1'
         DEPLOYMENT_REPO = 'https://github.com/nsatwik/complete-devops-automation.git'
     }
@@ -67,12 +67,9 @@ pipeline {
                     sh '''
                         set -eu
 
-                        aws ecr get-login-password --region "$AWS_REGION" |
-                            docker login --username AWS --password-stdin "$ECR_REPO"
-
+                        aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 815018697163.dkr.ecr.ap-south-1.amazonaws.com
                         docker tag "$IMAGE_NAME:$IMAGE_TAG" "$ECR_REPO:$IMAGE_TAG"
                         docker push "$ECR_REPO:$IMAGE_TAG"
-
                         docker tag "$IMAGE_NAME:$IMAGE_TAG" "$ECR_REPO:latest"
                         docker push "$ECR_REPO:latest"
                     '''
