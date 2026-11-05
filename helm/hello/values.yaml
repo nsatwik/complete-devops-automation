@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: 822426641221.dkr.ecr.ap-south-1.amazonaws.com/hello
+  repository: 815018697163.dkr.ecr.ap-south-1.amazonaws.com/myrepo
   tag: "617-19ef273"
   pullPolicy: IfNotPresent
 
